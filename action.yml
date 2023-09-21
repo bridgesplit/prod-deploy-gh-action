@@ -1,0 +1,68 @@
+name: Setup anchor and build and deploy program
+
+inputs:
+  rpc:
+    description: 'rpc'
+    required: true
+    type: string
+  pid:
+    description: 'program PID'
+    required: true
+    type: string
+  pid_env_var:
+    description: 'program PID env var'
+    required: true
+    type: string
+  program_name:
+    description: 'program name'
+    required: true
+    type: string
+  kp:
+    description: 'Deploy KP'
+    required: true
+    type: string
+  ssh_private_key:
+    description: 'SSH private key'
+    required: true
+    type: string
+  multisig_auth:
+    description: 'Multisig Auth Pubkey'
+    required: true
+    type: string
+  buffer_key:
+    description: 'Program buffer key'
+    required: true
+    type: string
+runs:
+  using: 'composite'
+  steps:
+    - name: Setup program
+      uses: bridgesplit/anchor-setup-gh-action@v1.0.0
+      with: 
+        ssh-private-key: ${{ inputs.ssh_private_key }}
+        rpc: ${{ inputs.rpc }}
+        pid: ${{ inputs.pid }}
+        pid_env_var: ${{ inputs.pid_env_var }}
+        program_name: ${{ inputs.program_name }}
+    - name: Solana Buffer Deploy
+      uses: actions/solana-buffer-deploy@v0.1.6
+      with:
+      network: ${{ inputs.rpc }}
+      program: my_program
+      keypair: ${{ inputs.kp }}
+      program-id: ${{ inputs.pid }}
+      buffer-authority: ${{ inputs.multisig_auth }}
+   - name: Squads Program Upgrade
+    uses: actions/squads-program-upgrade@v0.2.4
+    with:
+      network-url: ${{ inputs.rpc }}
+      program-multisig: '8QC4Lv3YNAHUmacepqxBKCJY5zx7yrDtQLo9sNFsNnqB'
+      program-id: ${{ inputs.pid }}
+      program-index: '1'
+      buffer:  ${{ inputs.buffer_key }}
+      idl-buffer:  ${{ inputs.buffer_key }}
+      spill-address: ${{ inputs.multisig_auth }}
+      authority: ${{ inputs.multisig_auth }}
+      name: 'GH Deploy'
+      keypair: ${{ inputs.kp }}
+  
