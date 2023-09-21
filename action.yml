@@ -49,7 +49,7 @@ runs:
       uses: cardinal-labs/solana-buffer-deploy@v0.1.6
       with:
         network: ${{ inputs.rpc }}
-        program: my_program
+        program: ${{ inputs.program_name }}
         keypair: ${{ inputs.kp }}
         program-id: ${{ inputs.pid }}
         buffer-authority: ${{ inputs.multisig_auth }}
