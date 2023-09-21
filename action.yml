@@ -47,7 +47,7 @@ runs:
         program_name: ${{ inputs.program_name }}
     
     - name: Solana Buffer Deploy
-      uses: actions/solana-buffer-deploy@v0.1.6
+      uses: cardinal-labs/solana-buffer-deploy@v0.1.6
       with:
         network: ${{ inputs.rpc }}
         program: my_program
@@ -56,7 +56,7 @@ runs:
         buffer-authority: ${{ inputs.multisig_auth }}
     
     - name: Squads Program Upgrade
-      uses: actions/squads-program-upgrade@v0.2.4
+      uses: cardinal-labs/squads-program-upgrade@v0.2.4
       with:
         network-url: ${{ inputs.rpc }}
         program-multisig: ${{ inputs.multisig_auth }}
