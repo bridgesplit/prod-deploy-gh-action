@@ -56,7 +56,7 @@ runs:
     uses: actions/squads-program-upgrade@v0.2.4
      with:
       network-url: ${{ inputs.rpc }}
-      program-multisig: '8QC4Lv3YNAHUmacepqxBKCJY5zx7yrDtQLo9sNFsNnqB'
+      program-multisig: ${{ inputs.multisig_auth }}
       program-id: ${{ inputs.pid }}
       program-index: '1'
       buffer:  ${{ inputs.buffer_key }}
