@@ -1,4 +1,4 @@
-name: Setup anchor and build and deploy program
+name: Deploy program to mainnet
 
 inputs:
   rpc:
