@@ -40,11 +40,10 @@ runs:
     - name: Setup program
       uses: bridgesplit/anchor-setup-gh-action@v1.0.2
       with:
-        ssh-private-key: ${{ inputs.ssh_private_key }}
+        ssh_private_key: ${{ inputs.ssh_private_key }}
         rpc: ${{ inputs.rpc }}
         pid: ${{ inputs.pid }}
         pid_env_var: ${{ inputs.pid_env_var }}
-        program_name: ${{ inputs.program_name }}
     
     - name: Solana Buffer Deploy
       uses: cardinal-labs/solana-buffer-deploy@v0.1.6
