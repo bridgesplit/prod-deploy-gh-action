@@ -38,7 +38,7 @@ runs:
   using: 'composite'
   steps:
     - name: Setup program
-      uses: bridgesplit/anchor-setup-gh-action@v1.0.2
+      uses: bridgesplit/anchor-setup-gh-action@v1.0.3
       with:
         ssh_private_key: ${{ inputs.ssh_private_key }}
         rpc: ${{ inputs.rpc }}
