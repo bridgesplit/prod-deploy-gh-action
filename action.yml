@@ -45,6 +45,15 @@ runs:
         pid: ${{ inputs.pid }}
         pid_env_var: ${{ inputs.pid_env_var }}
 
+    - run: solana-keygen new -o buffer-keypair --no-bip39-passphrase
+      name: Gen Buffer KP
+      shell: bash
+    - run: echo "$KEYPAIR" > ./deploy-keypair.json && chmod 600 ./deploy-keypair.json
+      name: Set Deploy KP
+      shell: bash
+      env:
+        KEYPAIR: ${{ inputs.kp }}
+  
     - name: Buffer Deploy
       uses: nick-invision/retry@v2
       with:
