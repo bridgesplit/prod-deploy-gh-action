@@ -45,14 +45,67 @@ runs:
         pid: ${{ inputs.pid }}
         pid_env_var: ${{ inputs.pid_env_var }}
     
-    - name: Solana Buffer Deploy
-      uses: cardinal-labs/solana-buffer-deploy@v0.1.6
+   - name: Buffer Deploy
+      uses: nick-invision/retry@v2
       with:
-        network: ${{ inputs.rpc }}
-        program: ${{ inputs.program_name }}
-        keypair: ${{ inputs.kp }}
-        program-id: ${{ inputs.pid }}
-        buffer-authority: ${{ inputs.multisig_auth }}
+        timeout_minutes: 30
+        max_attempts: 10
+        shell: bash
+        command: solana program write-buffer --buffer ./buffer-keypair -k ./deploy-keypair.json ./target/deploy/$PROGRAM.so -u $NETWORK > ./buffer.out
+      env:
+        NETWORK: ${{ inputs.rpc }}
+        PROGRAM: ${{ inputs.program_name }}
+
+    - name: IDL Buffer Deploy
+      uses: nick-invision/retry@v2
+      with:
+        timeout_minutes: 10
+        max_attempts: 10
+        shell: bash
+        command: anchor idl write-buffer $PROGRAM_ID --filepath ./target/idl/$PROGRAM.json --provider.cluster $NETWORK --provider.wallet ./deploy-keypair.json > idl-buffer.out
+      env:
+        PROGRAM_ID: ${{ inputs.pid }}
+        PROGRAM: ${{ inputs.program_name }}
+        NETWORK: ${{ inputs.rpc }}
+
+    - name: Set buffer output
+      id: buffer-deploy
+      shell: bash
+      run: |
+        echo "buffer=$(cat buffer.out | sed 's/Buffer: //g' | xargs echo -n)" >> $GITHUB_OUTPUT
+        echo "idl-buffer=$(cat idl-buffer.out | sed 's/Idl buffer created: //g' | xargs echo -n)" >> $GITHUB_OUTPUT
+    - run: echo "buffer=${{ steps.buffer-deploy.outputs.buffer }}"
+      shell: bash
+    - run: echo "idl-buffer=${{ steps.buffer-deploy.outputs.idl-buffer }}"
+      shell: bash
+
+    - name: Transfer idl buffer to authority
+      uses: nick-invision/retry@v2
+      with:
+        timeout_minutes: 10
+        max_attempts: 10
+        shell: bash
+        command: anchor idl set-authority $IDL_BUFFER --provider.cluster $NETWORK --program-id $PROGRAM_ID --new-authority $AUTHORITY --provider.wallet ./deploy-keypair.json
+      env:
+        IDL_BUFFER: ${{ steps.buffer-deploy.outputs.idl-buffer }}
+        AUTHORITY: ${{ inputs.multisig_auth }}
+        NETWORK: ${{ inputs.network }}
+        PROGRAM_ID: ${{ inputs.program-id }}
+
+    - name: Transfer buffer to authority
+      uses: nick-invision/retry@v2
+      with:
+        timeout_minutes: 10
+        max_attempts: 10
+        shell: bash
+        command: solana program set-buffer-authority $BUFFER -k ./deploy-keypair.json --new-buffer-authority $AUTHORITY -u $NETWORK
+      env:
+        BUFFER: ${{ steps.buffer-deploy.outputs.buffer }}
+        AUTHORITY: ${{ inputs.multisig_auth }}
+        NETWORK: ${{ inputs.network }}
+
+    - run: rm ./deploy-keypair.json
+      shell: bash
     
     - name: Squads Program Upgrade
       uses: cardinal-labs/squads-program-upgrade@v0.2.4
@@ -61,9 +114,9 @@ runs:
         program-multisig: ${{ inputs.multisig_auth }}
         program-id: ${{ inputs.pid }}
         program-index: '1'
-        buffer:  ${{ inputs.buffer_key }}
-        idl-buffer:  ${{ inputs.buffer_key }}
+        buffer:  ${{ steps.buffer-deploy.outputs.buffer }}
+        idl-buffer:  ${{ steps.buffer-deploy.outputs.idl-buffer }}
         spill-address: ${{ inputs.multisig_auth }}
         authority: ${{ inputs.multisig_auth }}
-        name: 'GH Deploy'
+        name: 'Multisig GH Deploy'
         keypair: ${{ inputs.kp }}
