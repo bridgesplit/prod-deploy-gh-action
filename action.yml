@@ -98,7 +98,7 @@ runs:
       env:
         IDL_BUFFER: ${{ steps.buffer-deploy.outputs.idl-buffer }}
         AUTHORITY: ${{ inputs.multisig_auth }}
-        NETWORK: ${{ inputs.network }}
+        NETWORK: ${{ inputs.rpc }}
         PROGRAM_ID: ${{ inputs.pid }}
 
     - name: Transfer buffer to authority
@@ -111,7 +111,7 @@ runs:
       env:
         BUFFER: ${{ steps.buffer-deploy.outputs.buffer }}
         AUTHORITY: ${{ inputs.multisig_auth }}
-        NETWORK: ${{ inputs.network }}
+        NETWORK: ${{ inputs.rpc }}
 
     - run: rm ./deploy-keypair.json
       shell: bash
