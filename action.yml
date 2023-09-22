@@ -94,7 +94,7 @@ runs:
       shell: bash
     
     - name: Squads Program Upgrade
-      uses: cardinal-labs/squads-program-upgrade@v0.2.4
+      uses: bridgesplit/squads-program-upgrade@v1.0.0
       with:
         network-url: ${{ inputs.rpc }}
         program-multisig: ${{ inputs.multisig_auth }}
