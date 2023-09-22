@@ -53,6 +53,11 @@ runs:
       shell: bash
       env:
         KEYPAIR: ${{ inputs.kp }}
+    - run: solana program close --buffers -k ./deploy-keypair.json
+      name: Close old buffers
+      shell: bash
+      env:
+        KEYPAIR: ${{ inputs.kp }}
   
     - name: Buffer Deploy
       uses: nick-invision/retry@v2
@@ -65,42 +70,14 @@ runs:
         NETWORK: ${{ inputs.rpc }}
         PROGRAM: ${{ inputs.program_name }}
 
-    - name: IDL Buffer Deploy
-      uses: nick-invision/retry@v2
-      with:
-        timeout_minutes: 10
-        max_attempts: 10
-        shell: bash
-        command: anchor idl write-buffer $PROGRAM_ID --filepath ./target/idl/$PROGRAM.json --provider.cluster $NETWORK --provider.wallet ./deploy-keypair.json > idl-buffer.out
-      env:
-        PROGRAM_ID: ${{ inputs.pid }}
-        PROGRAM: ${{ inputs.program_name }}
-        NETWORK: ${{ inputs.rpc }}
-
     - name: Set buffer output
       id: buffer-deploy
       shell: bash
       run: |
         echo "buffer=$(cat buffer.out | sed 's/Buffer: //g' | xargs echo -n)" >> $GITHUB_OUTPUT
-        echo "idl-buffer=$(cat idl-buffer.out | sed 's/Idl buffer created: //g' | xargs echo -n)" >> $GITHUB_OUTPUT
     - run: echo "buffer=${{ steps.buffer-deploy.outputs.buffer }}"
       shell: bash
-    - run: echo "idl-buffer=${{ steps.buffer-deploy.outputs.idl-buffer }}"
-      shell: bash
-
-    - name: Transfer idl buffer to authority
-      uses: nick-invision/retry@v2
-      with:
-        timeout_minutes: 10
-        max_attempts: 10
-        shell: bash
-        command: anchor idl set-authority $IDL_BUFFER --provider.cluster $NETWORK --program-id $PROGRAM_ID --new-authority $AUTHORITY --provider.wallet ./deploy-keypair.json
-      env:
-        IDL_BUFFER: ${{ steps.buffer-deploy.outputs.idl-buffer }}
-        AUTHORITY: ${{ inputs.multisig_auth }}
-        NETWORK: ${{ inputs.rpc }}
-        PROGRAM_ID: ${{ inputs.pid }}
-
+      
     - name: Transfer buffer to authority
       uses: nick-invision/retry@v2
       with:
@@ -124,7 +101,6 @@ runs:
         program-id: ${{ inputs.pid }}
         program-index: '1'
         buffer: ${{ steps.buffer-deploy.outputs.buffer }}
-        idl-buffer: ${{ steps.buffer-deploy.outputs.idl-buffer }}
         spill-address: ${{ inputs.multisig_auth }}
         authority: ${{ inputs.multisig_auth }}
         name: 'Multisig GH Deploy'
