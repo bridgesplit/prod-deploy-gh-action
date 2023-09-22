@@ -44,8 +44,8 @@ runs:
         rpc: ${{ inputs.rpc }}
         pid: ${{ inputs.pid }}
         pid_env_var: ${{ inputs.pid_env_var }}
-    
-   - name: Buffer Deploy
+
+    - name: Buffer Deploy
       uses: nick-invision/retry@v2
       with:
         timeout_minutes: 30
@@ -90,7 +90,7 @@ runs:
         IDL_BUFFER: ${{ steps.buffer-deploy.outputs.idl-buffer }}
         AUTHORITY: ${{ inputs.multisig_auth }}
         NETWORK: ${{ inputs.network }}
-        PROGRAM_ID: ${{ inputs.program-id }}
+        PROGRAM_ID: ${{ inputs.pid }}
 
     - name: Transfer buffer to authority
       uses: nick-invision/retry@v2
@@ -114,8 +114,8 @@ runs:
         program-multisig: ${{ inputs.multisig_auth }}
         program-id: ${{ inputs.pid }}
         program-index: '1'
-        buffer:  ${{ steps.buffer-deploy.outputs.buffer }}
-        idl-buffer:  ${{ steps.buffer-deploy.outputs.idl-buffer }}
+        buffer: ${{ steps.buffer-deploy.outputs.buffer }}
+        idl-buffer: ${{ steps.buffer-deploy.outputs.idl-buffer }}
         spill-address: ${{ inputs.multisig_auth }}
         authority: ${{ inputs.multisig_auth }}
         name: 'Multisig GH Deploy'
