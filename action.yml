@@ -17,6 +17,10 @@ inputs:
     description: 'program name'
     required: true
     type: string
+  program_index:
+    description: 'program index in Squads'
+    required: true
+    type: string
   kp:
     description: 'Deploy KP'
     required: true
@@ -27,6 +31,10 @@ inputs:
     type: string
   multisig_auth:
     description: 'Multisig Auth Pubkey'
+    required: true
+    type: string
+  multisig_pda:
+    description: 'Multisig PDA Pubkey'
     required: true
     type: string
   buffer_key:
@@ -97,9 +105,9 @@ runs:
       uses: bridgesplit/squads-program-upgrade@v1.0.0
       with:
         network-url: ${{ inputs.rpc }}
-        program-multisig: ${{ inputs.multisig_auth }}
+        program-multisig: ${{ inputs.multisig_pda }}
         program-id: ${{ inputs.pid }}
-        program-index: '1'
+        program-index: ${{ inputs.program_index }}
         buffer: ${{ steps.buffer-deploy.outputs.buffer }}
         spill-address: ${{ inputs.multisig_auth }}
         authority: ${{ inputs.multisig_auth }}
