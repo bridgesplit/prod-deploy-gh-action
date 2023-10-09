@@ -56,11 +56,19 @@ runs:
     - run: solana-keygen new -o buffer-keypair --no-bip39-passphrase
       name: Gen Buffer KP
       shell: bash
+
     - run: echo "$KEYPAIR" > ./deploy-keypair.json && chmod 600 ./deploy-keypair.json
       name: Set Deploy KP
       shell: bash
       env:
         KEYPAIR: ${{ inputs.kp }}
+
+    - name: Extract pubkey
+      id: extract-pubkey
+      run: |
+        echo "::set-output name=pubkey::$(solana-keygen pubkey ./deploy-keypair.json)"
+      shell: bash
+
     - run: solana program close --buffers -k ./deploy-keypair.json
       name: Close old buffers
       shell: bash
@@ -83,6 +91,7 @@ runs:
       shell: bash
       run: |
         echo "buffer=$(cat buffer.out | sed 's/Buffer: //g' | xargs echo -n)" >> $GITHUB_OUTPUT
+
     - run: echo "buffer=${{ steps.buffer-deploy.outputs.buffer }}"
       shell: bash
       
@@ -109,7 +118,7 @@ runs:
         program-id: ${{ inputs.pid }}
         program-index: ${{ inputs.program_index }}
         buffer: ${{ steps.buffer-deploy.outputs.buffer }}
-        spill-address: ${{ inputs.multisig_auth }}
+        spill-address: ${{ steps.extract-pubkey.outputs.pubkey }}
         authority: ${{ inputs.multisig_auth }}
         name: 'Multisig GH Deploy'
         keypair: ${{ inputs.kp }}
